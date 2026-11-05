@@ -1,0 +1,50 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <list>
+          <option value="pandas" />
+          <option value="numpy" />
+          <option value="openpyxl" />
+          <option value="xlrd" />
+          <option value="XlsxWriter" />
+          <option value="python-dateutil" />
+          <option value="Flask" />
+          <option value="Werkzeug" />
+          <option value="pdfplumber" />
+          <option value="pytest" />
+          <option value="matplotlib" />
+          <option value="asn1crypto" />
+          <option value="bcrypt" />
+          <option value="certifi" />
+          <option value="charset-normalizer" />
+          <option value="cryptography" />
+          <option value="distro" />
+          <option value="Fabric3" />
+          <option value="idna" />
+          <option value="jinja2" />
+          <option value="lxml" />
+          <option value="markupsafe" />
+          <option value="mypy-extensions" />
+          <option value="paramiko" />
+          <option value="pyasn1" />
+          <option value="pynacl" />
+          <option value="pyyaml" />
+          <option value="six" />
+          <option value="types-cryptography" />
+          <option value="types-paramiko" />
+          <option value="typing-extensions" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyStubPackagesAdvertiser" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <list>
+          <option value="pandas" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="TsLint" enabled="true" level="WARNING" enabled_by_default="true" />
+  </profile>
+</component>
