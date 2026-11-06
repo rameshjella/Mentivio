@@ -133,47 +133,48 @@ def draw_static_triangle(draw: ImageDraw.ImageDraw):
     draw_point_label(draw, c, "C", (31, 41, 55), label_font)
 
 
+def draw_step_panel(draw: ImageDraw.ImageDraw, steps: list[str], progress: float, x: int, y: int, font_size: int = 22):
+    active = min(len(steps) - 1, max(0, int(progress * len(steps))))
+    for idx, step in enumerate(steps):
+        text_color = (15, 23, 42) if idx == active else (85, 96, 110)
+        font = ensure_font(font_size if idx == active else max(16, font_size - 2))
+        draw.text((x, y + idx * 36), step, fill=text_color, font=font)
+
+
 def draw_geometry_scene(draw: ImageDraw.ImageDraw, scene: SceneSpec, t: float):
     a, b, c, d, e = geometry_points()
-    d_point = d
-    e_point = e
-    top = minimum = 0.0
-    if t < 0.35:
-        top = min(1.0, t / 0.35)
-    else:
-        top = 1.0
+    d_point = point_lerp(a, b, 0.42)
+    e_point = point_lerp(a, c, 0.42)
 
-    draw.line((a[0], a[1], b[0], b[1]), fill=(31, 41, 55), width=7)
-    draw.line((b[0], b[1], c[0], c[1]), fill=(31, 41, 55), width=7)
-    draw.line((c[0], c[1], a[0], a[1]), fill=(31, 41, 55), width=7)
+    # Construct the triangle progressively so the teacher appears to draw it live.
+    draw_line_progress(draw, a, b, min(1.0, t / 0.30), (31, 41, 55), 8)
+    draw_line_progress(draw, b, c, min(1.0, max(0.0, (t - 0.10) / 0.30)), (31, 41, 55), 8)
+    draw_line_progress(draw, c, a, min(1.0, max(0.0, (t - 0.20) / 0.30)), (31, 41, 55), 8)
 
-    if t > 0.12:
+    if t > 0.18:
         draw_point_label(draw, a, "A", (31, 41, 55), ensure_font(28))
         draw_point_label(draw, b, "B", (31, 41, 55), ensure_font(28))
         draw_point_label(draw, c, "C", (31, 41, 55), ensure_font(28))
 
-    if scene.kind in {"de_parallel", "angles", "ratio", "equation", "examples", "application", "assessment", "recap"}:
-        d_progress = min(1.0, max(0.0, (t - 0.12) / 0.36))
-        e_progress = min(1.0, max(0.0, (t - 0.22) / 0.38))
-        d_draw = point_lerp(a, b, 0.42)
-        e_draw = point_lerp(a, c, 0.42)
-        draw_point_label(draw, d_draw, "D", (220, 38, 38), ensure_font(28))
-        draw_point_label(draw, e_draw, "E", (220, 38, 38), ensure_font(28))
-        draw_line_progress(draw, a, d_draw, d_progress, (220, 38, 38), 6)
-        draw_line_progress(draw, a, e_draw, e_progress, (220, 38, 38), 6)
-        draw.line((d_draw[0], d_draw[1], e_draw[0], e_draw[1]), fill=(220, 38, 38), width=6)
-        draw.text((470, 295), "DE || BC", fill=(220, 38, 38), font=ensure_font(30))
+    if scene.kind in {"construct", "parallel", "de_parallel", "angles", "ratio", "equation", "examples", "application", "assessment", "recap"}:
+        if t > 0.30:
+            draw_point_label(draw, d_point, "D", (220, 38, 38), ensure_font(28))
+            draw_point_label(draw, e_point, "E", (220, 38, 38), ensure_font(28))
+        draw_line_progress(draw, a, d_point, min(1.0, max(0.0, (t - 0.30) / 0.28)), (220, 38, 38), 6)
+        draw_line_progress(draw, a, e_point, min(1.0, max(0.0, (t - 0.38) / 0.30)), (220, 38, 38), 6)
+        draw_line_progress(draw, d_point, e_point, min(1.0, max(0.0, (t - 0.46) / 0.28)), (220, 38, 38), 6)
+        draw.text((450, 300), "DE || BC", fill=(220, 38, 38), font=ensure_font(30))
 
-    if scene.kind in {"angles", "ratio", "equation", "examples", "application", "assessment", "recap"} and t > 0.18:
-        draw.arc((190, 500, 270, 580), start=0, end=60, fill=(3, 148, 99), width=5)
-        draw.arc((320, 455, 400, 535), start=0, end=60, fill=(3, 148, 99), width=5)
-        draw.text((150, 475), "∠A", fill=(3, 148, 99), font=ensure_font(22))
-        draw.text((355, 440), "∠A", fill=(3, 148, 99), font=ensure_font(22))
+    if scene.kind in {"angles", "ratio", "equation", "examples", "application", "assessment", "recap"} and t > 0.52:
+        draw.arc((180, 500, 270, 580), start=0, end=56, fill=(3, 148, 99), width=5)
+        draw.arc((315, 455, 395, 535), start=0, end=56, fill=(3, 148, 99), width=5)
+        draw.text((140, 470), "∠A", fill=(3, 148, 99), font=ensure_font(22))
+        draw.text((360, 435), "∠A", fill=(3, 148, 99), font=ensure_font(22))
 
-    if scene.kind in {"ratio", "equation", "examples", "application", "assessment", "recap"} and t > 0.24:
-        draw.polygon([a, d, e], outline=(29, 161, 242), fill=(214, 237, 255))
-        draw.text((350, 530), "smaller triangle ADE", fill=(29, 161, 242), font=ensure_font(22))
-        draw.text((655, 440), "AD / DB = AE / EC", fill=(9, 79, 164), font=ensure_font(28))
+    if scene.kind in {"ratio", "equation", "examples", "application", "assessment", "recap"} and t > 0.60:
+        draw.polygon([a, d_point, e_point], outline=(29, 161, 242), fill=(214, 237, 255))
+        draw.text((348, 530), "smaller triangle ADE", fill=(29, 161, 242), font=ensure_font(22))
+        draw.text((660, 440), "AD / DB = AE / EC", fill=(9, 79, 164), font=ensure_font(28))
 
 
 def draw_example_overlay(draw: ImageDraw.ImageDraw, index: int):
@@ -245,25 +246,23 @@ def draw_frame(scene: SceneSpec, frame_index: int, frames_in_scene: int, validat
         draw_static_triangle(draw)
         draw.rounded_rectangle((650, 220, 1190, 620), radius=18, fill=(214, 237, 255), outline=(158, 201, 239), width=2)
         draw.text((690, 255), "Real-world idea:", fill=(15, 23, 42), font=ensure_font(28))
-        draw.text((690, 300), "Maps, models, and buildings all", fill=(33, 41, 55), font=ensure_font(24))
-        draw.text((690, 336), "preserve shape with proportional", fill=(33, 41, 55), font=ensure_font(24))
-        draw.text((690, 372), "lengths.", fill=(33, 41, 55), font=ensure_font(24))
-        draw.text((690, 430), "When the shape stays similar,", fill=(33, 41, 55), font=ensure_font(24))
-        draw.text((690, 466), "the sides relate by ratio.", fill=(33, 41, 55), font=ensure_font(24))
+        draw.text((690, 300), "Maps and buildings preserve", fill=(33, 41, 55), font=ensure_font(24))
+        draw.text((690, 336), "shape while changing size.", fill=(33, 41, 55), font=ensure_font(24))
+        draw.text((690, 392), "That is proportional reasoning.", fill=(33, 41, 55), font=ensure_font(24))
     elif scene.kind == "prereq":
-        draw.rounded_rectangle((660, 250, 1185, 620), radius=18, fill=(255, 255, 255), outline=(198, 207, 217), width=2)
-        draw.text((690, 275), "Prerequisites", fill=(15, 23, 42), font=ensure_font(30))
-        draw.text((690, 330), "• Equal corresponding angles", fill=(31, 41, 55), font=ensure_font(26))
-        draw.text((690, 380), "• Side ratios compare lengths", fill=(31, 41, 55), font=ensure_font(26))
-        draw.text((690, 430), "• Similar triangles keep the same", fill=(31, 41, 55), font=ensure_font(26))
-        draw.text((690, 470), "  shape but can differ in size", fill=(31, 41, 55), font=ensure_font(26))
+        draw.rounded_rectangle((660, 260, 1185, 620), radius=18, fill=(255, 255, 255), outline=(198, 207, 217), width=2)
+        draw.text((690, 285), "Prerequisites", fill=(15, 23, 42), font=ensure_font(30))
+        draw.text((690, 340), "• Equal corresponding angles", fill=(31, 41, 55), font=ensure_font(25))
+        draw.text((690, 385), "• Ratios compare lengths", fill=(31, 41, 55), font=ensure_font(25))
+        draw.text((690, 430), "• Similar shapes keep the same", fill=(31, 41, 55), font=ensure_font(25))
+        draw.text((690, 475), "  geometric form", fill=(31, 41, 55), font=ensure_font(25))
         draw_static_triangle(draw)
     elif scene.kind == "similar":
         draw.rounded_rectangle((650, 230, 1210, 620), radius=18, fill=(236, 251, 239), outline=(175, 218, 192), width=2)
-        draw.text((675, 245), "Similarity means same shape, different size", fill=(15, 23, 42), font=ensure_font(26))
-        draw.text((675, 310), "• All corresponding angles are equal", fill=(31, 41, 55), font=ensure_font(23))
-        draw.text((675, 350), "• Corresponding sides are proportional", fill=(31, 41, 55), font=ensure_font(23))
-        draw.text((675, 390), "This creates a scale relationship.", fill=(31, 41, 55), font=ensure_font(23))
+        draw.text((675, 245), "Similarity = same shape, different size", fill=(15, 23, 42), font=ensure_font(25))
+        draw.text((675, 305), "• corresponding angles are equal", fill=(31, 41, 55), font=ensure_font(22))
+        draw.text((675, 345), "• corresponding sides are proportional", fill=(31, 41, 55), font=ensure_font(22))
+        draw.text((675, 385), "This is the idea that drives BPT.", fill=(31, 41, 55), font=ensure_font(22))
         draw.line((300, 510, 480, 310), fill=(31, 41, 55), width=7)
         draw.line((480, 310, 600, 510), fill=(31, 41, 55), width=7)
         draw.line((300, 510, 600, 510), fill=(31, 41, 55), width=7)
@@ -290,12 +289,7 @@ def draw_frame(scene: SceneSpec, frame_index: int, frames_in_scene: int, validat
     elif scene.kind == "application":
         draw.rounded_rectangle((640, 250, 1205, 610), radius=16, fill=(255, 255, 255), outline=(198, 207, 217), width=2)
         draw.text((670, 270), "Applications", fill=(15, 23, 42), font=ensure_font(29))
-        labels = [
-            "Architectural models",
-            "Surveying",
-            "Map scaling",
-            "Designing prototypes",
-        ]
+        labels = ["Architectural models", "Surveying", "Map scaling", "Designing prototypes"]
         y = 330
         for label in labels:
             draw.text((670, y), "• " + label, fill=(33, 41, 55), font=ensure_font(23))
@@ -305,10 +299,10 @@ def draw_frame(scene: SceneSpec, frame_index: int, frames_in_scene: int, validat
     elif scene.kind == "recap":
         draw.rounded_rectangle((660, 220, 1205, 620), radius=18, fill=(255, 249, 236), outline=(234, 186, 116), width=2)
         draw.text((685, 255), "Recap", fill=(15, 23, 42), font=ensure_font(30))
-        draw.text((685, 315), "If a line parallel to one side cuts the other two", fill=(33, 41, 55), font=ensure_font(24))
-        draw.text((685, 350), "sides, then the corresponding segments are proportional.", fill=(33, 41, 55), font=ensure_font(24))
+        draw.text((685, 315), "If a line parallel to one side cuts the", fill=(33, 41, 55), font=ensure_font(24))
+        draw.text((685, 350), "other two sides, the segments remain proportional.", fill=(33, 41, 55), font=ensure_font(24))
         draw.text((685, 415), "This is the Basic Proportionality Theorem.", fill=(3, 148, 99), font=ensure_font(26))
-        draw.text((685, 470), "AD / DB = AE / EC", fill=(9, 79, 164), font=ensure_font(28))
+        draw.text((685, 470), "AD / DB = AE / EC", fill=(9, 79, 164), font=ensure_font(30))
 
     if scene.kind == "equation":
         steps = [
@@ -318,18 +312,17 @@ def draw_frame(scene: SceneSpec, frame_index: int, frames_in_scene: int, validat
             "Step 4: Corresponding sides are proportional",
             "Final: AD / DB = AE / EC",
         ]
-        vis = max(1, min(len(steps), int(1 + t * len(steps))))
-        y = 430
-        for step in steps[:vis]:
-            draw.text((650, y), step, fill=(9, 79, 164), font=ensure_font(22))
-            y += 46
+        draw_step_panel(draw, steps, t, 650, 430, font_size=24)
 
     if scene.kind == "ratio":
-        draw.text((650, 475), "AD / AB = AE / AC", fill=(9, 79, 164), font=ensure_font(29))
-        draw.text((650, 520), "=> AD / DB = AE / EC", fill=(9, 79, 164), font=ensure_font(29))
+        draw.text((650, 470), "AD / AB = AE / AC", fill=(9, 79, 164), font=ensure_font(32))
+        draw.text((650, 520), "=> AD / DB = AE / EC", fill=(9, 79, 164), font=ensure_font(32))
 
-    panel_text = scene.narration_en
-    draw_text_block(draw, panel_text, 650, 170, 530, 23, (33, 41, 55), validations, frame_index)
+    teacher_text = scene.narration_en
+    if scene.kind in {"equation", "ratio", "examples1", "examples2", "examples3", "assessment"}:
+        draw_text_block(draw, teacher_text, 650, 170, 500, 20, (33, 41, 55), validations, frame_index)
+    else:
+        draw_text_block(draw, teacher_text, 650, 170, 500, 22, (33, 41, 55), validations, frame_index)
 
     return image
 
@@ -483,6 +476,84 @@ def merge_audio_video(video: Path, audio: Path, output: Path):
     subprocess.run(cmd, check=True)
 
 
+def concatenate_audio_segments(segment_paths: list[Path], output_path: Path):
+    if not segment_paths:
+        raise ValueError("No audio segments to concatenate")
+    list_path = output_path.parent / "narration_concat.txt"
+    with list_path.open("w", encoding="utf-8") as handle:
+        for path in segment_paths:
+            handle.write(f"file '{path.as_posix()}'\n")
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-y",
+            "-f",
+            "concat",
+            "-safe",
+            "0",
+            "-i",
+            str(list_path),
+            "-c",
+            "copy",
+            str(output_path),
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
+def render_scene_audio_for_duration(scene: SceneSpec, out_path: Path, target_duration: float, voice_id: str | None = None):
+    base_name = out_path.with_suffix("")
+    spoken_path = base_name.parent / f"{base_name.name}_spoken.wav"
+    render_narration_wav(scene.narration_en, spoken_path, voice_id=voice_id)
+    spoken_duration = wav_duration_seconds(spoken_path)
+    if spoken_duration >= target_duration:
+        spoken_path.replace(out_path)
+        return
+
+    pad_path = base_name.parent / f"{base_name.name}_pad.wav"
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-y",
+            "-f",
+            "lavfi",
+            "-i",
+            "anullsrc=r=22050:cl=mono",
+            "-t",
+            f"{max(0.25, target_duration - spoken_duration):.3f}",
+            str(pad_path),
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+    combined_path = base_name.parent / f"{base_name.name}_combined.wav"
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-y",
+            "-i",
+            str(spoken_path),
+            "-i",
+            str(pad_path),
+            "-filter_complex",
+            "[0:a][1:a]concat=n=2:v=0:a=1[out]",
+            "-map",
+            "[out]",
+            str(combined_path),
+        ],
+        check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    combined_path.replace(out_path)
+    pad_path.unlink(missing_ok=True)
+    spoken_path.unlink(missing_ok=True)
+
+
 def render_lesson(language: str = "English", subtitle_language: str = "English", fps: int = 24):
     if fps < 24 or fps > 30:
         raise ValueError("FPS must be between 24 and 30")
@@ -507,16 +578,8 @@ def render_lesson(language: str = "English", subtitle_language: str = "English",
 
     narration_wav = output_dir / "mentivio_bpt_lesson.wav"
     print("[Mentivio] Generating narration...")
-    narration_text = " ".join(scene.narration_en for scene in scenes)
-    voice_id = telugu_voice_id if narration_language == "telugu" else None
-    render_narration_wav(narration_text, narration_wav, voice_id=voice_id)
-    total_audio_duration = wav_duration_seconds(narration_wav)
-    print(f"[Mentivio] Narration duration: {round(total_audio_duration, 2)} seconds")
-
     total_scene_time = sum(scene.base_duration for scene in scenes)
     target_duration = max(180.0, min(300.0, total_scene_time))
-    if total_audio_duration > 0 and total_audio_duration < target_duration:
-        target_duration = min(300.0, max(target_duration, total_audio_duration + 6.0))
     scale = target_duration / total_scene_time if total_scene_time > 0 else 1.0
 
     scene_plan = []
@@ -526,28 +589,38 @@ def render_lesson(language: str = "English", subtitle_language: str = "English",
         duration = scene.base_duration * scale
         frame_count = max(1, int(round(duration * fps)))
         duration = frame_count / fps
-        est_audio = total_audio_duration * (word_count(scene.narration_en) / max(1, sum(word_count(s.narration_en) for s in scenes)))
-        scene_plan.append(
-            {
-                "scene": scene,
-                "audio_duration": est_audio,
-                "duration": duration,
-                "frame_count": frame_count,
-            }
-        )
+        scene_plan.append({
+            "scene": scene,
+            "audio_duration": duration,
+            "duration": duration,
+            "frame_count": frame_count,
+        })
         subtitle_text = scene.narration_en if subtitle_language.lower() == "english" else scene.subtitle_te
         cues.append((t, t + duration, subtitle_text))
         t += duration
 
+    # Build per-scene narration files and pad each one to match its exact on-screen segment length.
+    scene_audio_paths: list[Path] = []
+    for row in scene_plan:
+        scene = row["scene"]
+        scene_path = output_dir / f"{scene.key}_narration.wav"
+        render_scene_audio_for_duration(scene, scene_path, row["duration"], voice_id=telugu_voice_id if narration_language == "telugu" else None)
+        scene_audio_paths.append(scene_path)
+
+    concatenate_audio_segments(scene_audio_paths, narration_wav)
+    total_audio_duration = wav_duration_seconds(narration_wav)
+    print(f"[Mentivio] Completed narration timing: {round(total_audio_duration, 2)} seconds")
+
     silent_video = output_dir / "mentivio_bpt_lesson_silent.mp4"
     frames_dir = output_dir / "frames"
     expected_frames = sum(row["frame_count"] for row in scene_plan)
-    existing_frames = len(list(frames_dir.glob("frame_*.jpg"))) if frames_dir.exists() else 0
-    if silent_video.exists() and existing_frames == expected_frames:
-        print(f"[Mentivio] Reusing existing silent video ({existing_frames} frames).")
-        validation_issues = []
+    if frames_dir.exists():
+        for old in frames_dir.glob("frame_*.jpg"):
+            old.unlink()
     else:
-        validation_issues = render_video(scene_plan, silent_video, fps)
+        frames_dir.mkdir(parents=True, exist_ok=True)
+    print(f"[Mentivio] Rendering fresh geometry frames ({expected_frames} frames) for the teacher-led lesson.")
+    validation_issues = render_video(scene_plan, silent_video, fps)
     print("[Mentivio] Merging narration with video...")
 
     final_video = output_dir / "mentivio_bpt_lesson_with_audio.mp4"
@@ -569,7 +642,7 @@ def render_lesson(language: str = "English", subtitle_language: str = "English",
                 "start_seconds": round(cursor, 3),
                 "end_seconds": round(cursor + duration, 3),
                 "duration_seconds": round(duration, 3),
-                "audio_duration_seconds": round(row["audio_duration"], 3),
+                "audio_duration_seconds": round(duration, 3),
                 "kind": scene.kind,
             }
         )
@@ -660,4 +733,3 @@ def render_lesson(language: str = "English", subtitle_language: str = "English",
         "duration_seconds": measured_duration,
         "fps": measured_fps_value,
     }
-
