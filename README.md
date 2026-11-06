@@ -22,18 +22,18 @@ cd C:\SourceCode\Mentivio
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
+## Run the local desktop app
+
+```powershell
+cd C:\SourceCode\Mentivio
+.\.venv\Scripts\python.exe -m app.mentivio_app
+```
+
 ## Render from CLI (quick verification)
 
 ```powershell
 cd C:\SourceCode\Mentivio
 .\.venv\Scripts\python.exe -m app.render_lesson --language English --subtitle-language English --fps 24
-```
-
-## Run Streamlit UI
-
-```powershell
-cd C:\SourceCode\Mentivio
-.\.venv\Scripts\streamlit.exe run app\mentivio_app.py --server.headless true --server.port 8501
 ```
 
 ## Outputs
@@ -49,4 +49,3 @@ The renderer writes artifacts to `output/lesson_bpt/`:
 
 - Telugu narration uses a genuine local Telugu voice only if present.
 - If Telugu voice is not installed, narration falls back to English and this is explicitly reported in `validation_report.json`.
-
